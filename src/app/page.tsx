@@ -6,10 +6,11 @@ import { useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { AttendanceButton } from "@/components/attendance-button";
+import { LogOut } from "lucide-react";
 
 export default function Home() {
   const {user,isSignedIn} = useUser();
-  const { openSignIn } = useClerk();
+  const { openSignIn, signOut } = useClerk();
   
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-20">
@@ -44,6 +45,15 @@ export default function Home() {
             })}
           </div>
           <AttendanceButton />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => signOut()}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
+          >
+            <LogOut className="w-4 h-4" />
+            Đăng xuất
+          </Button>
         </div>
       )}
     </div>
