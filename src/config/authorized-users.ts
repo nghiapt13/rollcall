@@ -1,12 +1,14 @@
-// Danh sách userId được cấp phép điểm danh
-export const AUTHORIZED_USER_IDS = [
-  // Thêm userId của ClerkJS vào đây
-  'user_2y8mP4B98VNQyNkqIDhNfwtQuby',
-  'user_2y928V81U09M2TGAE050tJ5Ny0r'
-  
-  // Để lấy userId của bạn, hãy console.log(user.id) trong component
-  // hoặc kiểm tra trong ClerkJS dashboard
-];
+// Danh sách userId được cấp phép điểm danh từ environment variables
+const getAuthorizedUserIds = (): string[] => {
+  const userIds = process.env.NEXT_PUBLIC_AUTHORIZED_USER_IDS;
+  if (!userIds) {
+    console.warn('NEXT_PUBLIC_AUTHORIZED_USER_IDS not found in environment variables');
+    return [];
+  }
+  return userIds.split(',').map(id => id.trim()).filter(id => id.length > 0);
+};
+
+export const AUTHORIZED_USER_IDS = getAuthorizedUserIds();
 
 /**
  * Kiểm tra xem userId có được phép điểm danh không
