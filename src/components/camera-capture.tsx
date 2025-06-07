@@ -114,7 +114,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     width: optimalRes.width,
     height: optimalRes.height,
     facingMode: facingMode,
-    frameRate: isMobile ? 12 : 25, // Frame rate thấp hơn cho mobile
+    frameRate: isMobile ? 20 : 30, // Frame rate cao hơn cho chất lượng tốt
     aspectRatio: isMobile ? 3/4 : 4/3
   };
 
@@ -144,7 +144,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     setCameraReady(false);
   }, []);
 
-  // Chụp ảnh
+  // Chụp ảnh với chất lượng cao
   const capturePhoto = useCallback(() => {
     if (!webcamRef.current || !cameraReady) return;
 
@@ -155,8 +155,9 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
     if (imageSrc) {
       setCapturedImage(imageSrc);
-      console.log('📸 Đã chụp ảnh', isMobile ? '(Mobile)' : '(Desktop)', 
-                  `- Độ phân giải: ${optimalRes.width}x${optimalRes.height}`);
+      console.log('📸 Đã chụp ảnh chất lượng cao', isMobile ? '(Mobile)' : '(Desktop)', 
+                  `- Độ phân giải: ${optimalRes.width}x${optimalRes.height}`,
+                  `- Chất lượng: ${Math.round(optimalRes.quality * 100)}%`);
     } else {
       console.error('❌ Không thể chụp ảnh');
       setCameraError('Không thể chụp ảnh. Vui lòng thử lại.');
@@ -217,6 +218,11 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
         <p className="text-sm text-gray-600">
           Vui lòng chụp ảnh để xác thực danh tính khi chấm công
         </p>
+        {isMobile && (
+          <p className="text-xs text-blue-600 mt-1">
+            📱 Chế độ chất lượng cao: {optimalRes.width}x{optimalRes.height} • {Math.round(optimalRes.quality * 100)}%
+          </p>
+        )}
       </div>
 
       {isCheckingCamera ? (
@@ -344,7 +350,8 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
             <div className="text-xs text-center text-gray-500">
               Camera: {facingMode === 'user' ? 'Trước' : 'Sau'} •
               Độ phân giải: {videoConstraints.width}x{videoConstraints.height} •
-              FPS: {videoConstraints.frameRate}
+              FPS: {videoConstraints.frameRate} •
+              Chất lượng: {Math.round(optimalRes.quality * 100)}%
             </div>
           )}
         </div>

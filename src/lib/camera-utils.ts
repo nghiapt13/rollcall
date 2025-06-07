@@ -156,27 +156,27 @@ const adjustConstraintsForMobile = (constraints: MediaStreamConstraints): MediaS
 
   const videoConstraints = { ...constraints.video };
   
-  // Điều chỉnh cho mobile
+  // Điều chỉnh cho mobile với chất lượng cao hơn
   if (CameraEnvironment.isMobile()) {
-    // Độ phân giải tối ưu cho mobile (tránh lag)
+    // Độ phân giải cao cho mobile (chất lượng tốt)
     if (CameraEnvironment.isAndroid()) {
-      // Android: Độ phân giải vừa phải
-      videoConstraints.width = { ideal: 480, max: 720 };
-      videoConstraints.height = { ideal: 640, max: 960 };
+      // Android: Độ phân giải cao hơn cho chất lượng tốt
+      videoConstraints.width = { ideal: 720, max: 1080 };
+      videoConstraints.height = { ideal: 960, max: 1440 };
     } else if (CameraEnvironment.isIOS()) {
-      // iOS: Có thể xử lý độ phân giải cao hơn
-      videoConstraints.width = { ideal: 540, max: 720 };
-      videoConstraints.height = { ideal: 960, max: 1280 };
+      // iOS: Độ phân giải cao nhất có thể
+      videoConstraints.width = { ideal: 720, max: 1080 };
+      videoConstraints.height = { ideal: 1280, max: 1920 };
     } else {
-      // Mobile khác: Độ phân giải thấp để đảm bảo tương thích
-      videoConstraints.width = { ideal: 480, max: 640 };
-      videoConstraints.height = { ideal: 640, max: 800 };
+      // Mobile khác: Độ phân giải trung bình cao
+      videoConstraints.width = { ideal: 640, max: 800 };
+      videoConstraints.height = { ideal: 853, max: 1067 };
     }
     
-    // Frame rate thấp để tiết kiệm pin và băng thông
-    videoConstraints.frameRate = { ideal: 12, max: 20 };
+    // Frame rate cao hơn cho chất lượng mượt mà
+    videoConstraints.frameRate = { ideal: 20, max: 30 };
     
-    // Các tối ưu khác cho mobile
+    // Các tối ưu chất lượng cho mobile
     videoConstraints.aspectRatio = { ideal: 3/4 }; // Tỷ lệ phù hợp với portrait
   }
 
@@ -312,26 +312,26 @@ export const hasMultipleCameras = async (): Promise<boolean> => {
   }
 };
 
-// Lấy độ phân giải tối ưu cho thiết bị
+// Lấy độ phân giải chất lượng cao cho thiết bị
 export const getOptimalResolution = () => {
   if (!CameraEnvironment.isMobile()) {
-    return { width: 640, height: 480, quality: 0.8 };
+    return { width: 640, height: 480, quality: 0.85 };
   }
   
-  // Mobile: độ phân giải tối ưu theo từng platform
+  // Mobile: độ phân giải chất lượng cao theo từng platform
   if (CameraEnvironment.isAndroid()) {
-    return { width: 480, height: 640, quality: 0.75 };
+    return { width: 720, height: 960, quality: 0.85 };
   } else if (CameraEnvironment.isIOS()) {
-    return { width: 540, height: 720, quality: 0.8 };
+    return { width: 720, height: 1280, quality: 0.9 };
   } else {
-    return { width: 480, height: 640, quality: 0.7 };
+    return { width: 640, height: 853, quality: 0.8 };
   }
 };
 
-// Tối ưu hóa ảnh cho mobile (giảm dung lượng)
+// Tối ưu hóa ảnh với chất lượng cao
 export const optimizeImageForMobile = (canvas: HTMLCanvasElement): string => {
   const { quality } = getOptimalResolution();
   
-  // Sử dụng JPEG với chất lượng thấp hơn cho mobile để giảm dung lượng
+  // Sử dụng JPEG với chất lượng cao cho ảnh rõ nét
   return canvas.toDataURL('image/jpeg', quality);
 }; 
