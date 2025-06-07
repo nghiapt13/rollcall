@@ -15,7 +15,7 @@ export function LoginStatus() {
   const statusConfig = {
     checking: {
       icon: <Clock className="w-4 h-4 animate-spin" />,
-      text: 'Đang kiểm tra trạng thái điểm danh...',
+      text: 'Đang kiểm tra trạng thái chấm công...',
       bgColor: 'bg-blue-50 border-blue-200',
       textColor: 'text-blue-700'
     },
@@ -33,7 +33,7 @@ export function LoginStatus() {
     },
     already_checked_in: {
       icon: <CheckCircle2 className="w-4 h-4" />,
-      text: 'Hôm nay bạn đã điểm danh thành công',
+      text: 'Hôm nay bạn đã chấm công thành công',
       bgColor: 'bg-amber-50 border-amber-200',
       textColor: 'text-amber-700'
     },

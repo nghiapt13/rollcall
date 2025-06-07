@@ -11,7 +11,7 @@ import { isAuthorizedUser } from '@/config/authorized-users';
 
 export function AttendanceButton() {
   const { user } = useUser();
-  const { attendanceStatus, handleAttendance, resetStatus } = useManualAttendance();
+  const { attendanceStatus, handleAttendance, handlePhotoCapture, resetStatus } = useManualAttendance();
   const { hasCheckedInToday, isLoading: statusLoading, refreshStatus } = useAttendanceStatus();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
@@ -35,7 +35,7 @@ export function AttendanceButton() {
     }
     
     setIsDialogOpen(true);
-    // Ngay lập tức chạy quá trình điểm danh sau khi mở dialog
+    // Ngay lập tức kiểm tra và chạy quá trình điểm danh
     setTimeout(() => {
       handleAttendance();
     }, 100); // Delay nhỏ để dialog kịp mở
@@ -82,7 +82,7 @@ export function AttendanceButton() {
         ) : (
           <>
             <CheckCircle className="w-4 h-4 mr-2" />
-            Điểm danh
+            Chấm công
           </>
         )}
       </Button>
@@ -100,6 +100,7 @@ export function AttendanceButton() {
         onOpenChange={handleCloseDialog}
         attendanceStatus={attendanceStatus}
         onAttendance={handleAttendance}
+        onPhotoCapture={handlePhotoCapture}
       />
     </div>
   );

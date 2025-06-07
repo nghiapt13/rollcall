@@ -1,13 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { checkAttendanceStatus } from '@/lib/google-sheets';
 
 export function useAttendanceStatus() {
   const { user, isSignedIn } = useUser();
   const [hasCheckedInToday, setHasCheckedInToday] = useState<boolean | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const checkStatus = useCallback(() => {
+  const checkStatus = useCallback(async () => {
     if (!isSignedIn || !user) return;
     
     const userEmail = user.emailAddresses[0]?.emailAddress;
@@ -15,17 +14,32 @@ export function useAttendanceStatus() {
 
     setIsLoading(true);
     
-    checkAttendanceStatus(userEmail)
-      .then((result) => {
-        setHasCheckedInToday(result.hasCheckedInToday);
-      })
-      .catch((error) => {
-        console.error('Lỗi khi kiểm tra trạng thái điểm danh:', error);
-        setHasCheckedInToday(null);
-      })
-      .finally(() => {
-        setIsLoading(false);
+    try {
+      const response = await fetch('/api/check-attendance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: userEmail,
+          userId: user.id
+        }),
       });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setHasCheckedInToday(result.hasCheckedInToday);
+      } else {
+        console.error('Lỗi kiểm tra trạng thái:', result.error);
+        setHasCheckedInToday(null);
+      }
+    } catch (error) {
+      console.error('Lỗi khi kiểm tra trạng thái điểm danh:', error);
+      setHasCheckedInToday(null);
+    } finally {
+      setIsLoading(false);
+    }
   }, [isSignedIn, user]);
 
   useEffect(() => {

@@ -4,13 +4,14 @@ import { isAuthorizedUser } from '@/config/authorized-users';
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, name, loginTime, userId } = await request.json();
+        const { email, name, loginTime, userId, photoLink } = await request.json();
 
         console.log('=== ĐIỂM DANH API ===');
         console.log('Email:', email);
         console.log('Name:', name);
         console.log('LoginTime:', loginTime);
         console.log('UserId:', userId);
+        console.log('PhotoLink:', photoLink);
 
         if (!email) {
             return NextResponse.json(
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
         // Đọc dữ liệu từ sheet để kiểm tra
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'Sheet1!A:D',
+            range: 'Sheet1!A:E',
         });
 
         const rows = response.data.values || [];
@@ -127,12 +128,13 @@ export async function POST(request: NextRequest) {
             email,
             name,
             loginTime,
-            new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })
+            new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
+            photoLink || 'Không có ảnh'
         ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: 'Sheet1!A:D',
+            range: 'Sheet1!A:E',
             valueInputOption: 'RAW',
             requestBody: {
                 values: [newRow],
