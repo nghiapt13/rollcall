@@ -4,32 +4,20 @@ import { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import { AlertCircle, CheckCircle, Camera, X } from 'lucide-react';
 
-interface CameraDevice {
-  deviceId: string;
-  label: string;
-  kind: string;
-}
-
-interface ErrorDetails {
-  name: string;
-  message: string;
-  constraint?: string;
-}
-
 interface DebugInfo {
-  timestamp: string;
-  browser: string;
-  isHttps: boolean;
-  mediaDevicesSupported: boolean;
-  getUserMediaSupported: boolean;
-  permissions: string | null;
-  devices: CameraDevice[];
-  cameraTest: string | null;
-  errorDetails: ErrorDetails | null;
+  timestamp?: string;
+  browser?: string;
+  isHttps?: boolean;
+  mediaDevicesSupported?: boolean;
+  getUserMediaSupported?: boolean;
+  permissions?: string | null;
+  devices?: Array<{ deviceId: string; label: string; kind: string }>;
+  cameraTest?: string | null;
+  errorDetails?: { name: string; message: string; constraint?: string } | null;
 }
 
 export function CameraDebug() {
-  const [debugInfo, setDebugInfo] = useState<Partial<DebugInfo>>({});
+  const [debugInfo, setDebugInfo] = useState<DebugInfo>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,25 +54,25 @@ export function CameraDebug() {
       }
 
       // 3. List devices
-      if (navigator.mediaDevices?.enumerateDevices) {
-        try {
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          info.devices = devices.filter(device => device.kind === 'videoinput').map(device => ({
-            deviceId: device.deviceId,
-            label: device.label || 'Unknown Camera',
-            kind: device.kind
-          }));
-          console.log('📹 Available cameras:', info.devices);
-        } catch (e) {
-          info.devices = [];
-          console.log('⚠️ Device enumeration failed:', e);
-        }
+      try {
+        const { safeEnumerateDevices } = await import('@/lib/camera-utils');
+        const devices = await safeEnumerateDevices();
+        info.devices = devices.map(device => ({
+          deviceId: device.deviceId,
+          label: device.label || 'Unknown Camera',
+          kind: device.kind
+        }));
+        console.log('📹 Available cameras:', info.devices);
+      } catch (e) {
+        info.devices = [{ deviceId: 'error', label: 'enum_failed', kind: 'videoinput' }];
+        console.log('⚠️ Device enumeration failed:', e);
       }
 
       // 4. Test camera access
       try {
         console.log('🎥 Testing camera access...');
-        const stream = await navigator.mediaDevices.getUserMedia({
+        const { safeGetUserMedia } = await import('@/lib/camera-utils');
+        const stream = await safeGetUserMedia({
           video: {
             facingMode: 'user',
             width: { ideal: 640 },
@@ -105,20 +93,20 @@ export function CameraDebug() {
         stream.getTracks().forEach(track => track.stop());
         
       } catch (e: unknown) {
-        info.cameraTest = 'failed';
         const error = e as Error;
+        info.cameraTest = 'failed';
         info.errorDetails = {
           name: error.name,
           message: error.message,
-          constraint: 'constraint' in error ? (error as { constraint?: string }).constraint : undefined
+          constraint: (error as Error & { constraint?: string }).constraint
         };
-        console.error('❌ Camera test failed:', e);
+        console.error('❌ Camera test failed:', error);
         setError(`Lỗi camera: ${error.name} - ${error.message}`);
       }
 
     } catch (e: unknown) {
-      console.error('❌ Debug failed:', e);
       const error = e as Error;
+      console.error('❌ Debug failed:', error);
       setError(`Lỗi debug: ${error.message}`);
     }
 
@@ -214,9 +202,9 @@ export function CameraDebug() {
         {/* Available Cameras */}
         <div>
           <h3 className="font-medium mb-2">Cameras có sẵn ({debugInfo.devices?.length || 0}):</h3>
-          {(debugInfo.devices?.length ?? 0) > 0 ? (
+          {debugInfo.devices && debugInfo.devices.length > 0 ? (
             <ul className="space-y-1">
-              {debugInfo.devices?.map((device: CameraDevice, index: number) => (
+              {debugInfo.devices.map((device: { deviceId: string; label: string; kind: string }, index: number) => (
                 <li key={index} className="text-sm bg-gray-50 p-2 rounded">
                   {device.label || `Camera ${index + 1}`} ({device.deviceId?.slice(0, 20)}...)
                 </li>

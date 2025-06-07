@@ -8,7 +8,7 @@ import { CameraDebug } from "@/components/camera-debug";
 import { LogOut, Bug, Settings } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
-import { isAuthorizedUser } from "@/config/authorized-users";
+import { isAdminUser } from "@/config/authorized-users";
 
 export default function Home() {
   const {user,isSignedIn} = useUser();
@@ -16,7 +16,7 @@ export default function Home() {
   const [showDebug, setShowDebug] = useState(false);
   
   // Kiểm tra quyền admin
-  const isAdmin = user?.id ? isAuthorizedUser(user.id) : false;
+  const isAdmin = user?.id ? isAdminUser(user.id) : false;
   
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-20">

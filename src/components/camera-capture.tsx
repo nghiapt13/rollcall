@@ -3,7 +3,15 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Camera, RotateCcw, Check, X, Smartphone, Monitor } from 'lucide-react';
 import { Button } from './ui/button';
+import Image from 'next/image';
 import Webcam from 'react-webcam';
+import { 
+  CameraEnvironment, 
+  safeGetUserMedia, 
+  safeEnumerateDevices, 
+  testCameraAccess,
+
+} from '@/lib/camera-utils';
 
 interface CameraCaptureProps {
   onCapture: (imageBlob: Blob) => void;
@@ -11,17 +19,8 @@ interface CameraCaptureProps {
   isProcessing?: boolean;
 }
 
-// Phát hiện thiết bị mobile
-const isMobileDevice = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-         Boolean(navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-};
-
-// Kiểm tra hỗ trợ getUserMedia
-const supportsGetUserMedia = () => {
-  return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
-};
+// Sử dụng CameraEnvironment từ utils
+const supportsGetUserMedia = CameraEnvironment.hasGetUserMedia;
 
 export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptureProps) {
   const webcamRef = useRef<Webcam>(null);
@@ -36,9 +35,9 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
   // Kiểm tra thiết bị và camera khi component mount
   useEffect(() => {
     const checkDeviceAndCamera = async () => {
-      setIsMobile(isMobileDevice());
-      
-      if (!supportsGetUserMedia()) {
+      setIsMobile(!!CameraEnvironment.isMobile());
+
+      if (!CameraEnvironment.hasGetUserMedia()) {
         setCameraError('Trình duyệt không hỗ trợ camera. Vui lòng sử dụng trình duyệt hiện đại.');
         setIsCheckingCamera(false);
         return;
@@ -46,15 +45,14 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
       try {
         // Kiểm tra danh sách camera có sẵn
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-        
+        const videoDevices = await safeEnumerateDevices();
+
         console.log('📹 Phát hiện camera:', videoDevices.length);
         setHasMultipleCameras(videoDevices.length > 1);
 
         // Thử truy cập camera để kiểm tra quyền
-        await testCameraAccess();
-        
+        await testCameraAccessLocal();
+
       } catch (error) {
         console.error('❌ Lỗi kiểm tra camera:', error);
         handleCameraError(error);
@@ -66,21 +64,22 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     checkDeviceAndCamera();
   }, []);
 
-  // Test camera access với getUserMedia
-  const testCameraAccess = async () => {
+  // Test camera access với safeGetUserMedia
+  const testCameraAccessLocal = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const stream = await safeGetUserMedia({
         video: {
           facingMode: 'user',
-          width: { ideal: isMobile ? 720 : 640 },
-          height: { ideal: isMobile ? 1280 : 480 }
+          width: { ideal: CameraEnvironment.isMobile() ? 720 : 640 },
+          height: { ideal: CameraEnvironment.isMobile() ? 1280 : 480 }
         }
       });
-      
+
       // Dừng stream ngay sau khi test
       stream.getTracks().forEach(track => track.stop());
       console.log('✅ Camera access test thành công');
-      
+      return true;
+
     } catch (error: unknown) {
       console.error('❌ Camera access test failed:', error);
       throw error;
@@ -89,22 +88,21 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
   // Xử lý lỗi camera cụ thể
   const handleCameraError = (error: unknown) => {
+    const err = error as Error;
     let errorMessage = 'Không thể truy cập camera';
-    
-    if (error instanceof Error) {
-      if (error.name === 'NotAllowedError') {
-        errorMessage = 'Vui lòng cho phép truy cập camera trong cài đặt trình duyệt';
-      } else if (error.name === 'NotFoundError') {
-        errorMessage = 'Không tìm thấy camera trên thiết bị';
-      } else if (error.name === 'NotReadableError') {
-        errorMessage = 'Camera đang được sử dụng bởi ứng dụng khác';
-      } else if (error.name === 'OverconstrainedError') {
-        errorMessage = 'Cấu hình camera không được hỗ trợ';
-      } else if (error.name === 'SecurityError') {
-        errorMessage = 'Truy cập camera bị chặn do bảo mật';
-      }
+
+    if (err.name === 'NotAllowedError') {
+      errorMessage = 'Vui lòng cho phép truy cập camera trong cài đặt trình duyệt';
+    } else if (err.name === 'NotFoundError') {
+      errorMessage = 'Không tìm thấy camera trên thiết bị';
+    } else if (err.name === 'NotReadableError') {
+      errorMessage = 'Camera đang được sử dụng bởi ứng dụng khác';
+    } else if (err.name === 'OverconstrainedError') {
+      errorMessage = 'Cấu hình camera không được hỗ trợ';
+    } else if (err.name === 'SecurityError') {
+      errorMessage = 'Truy cập camera bị chặn do bảo mật';
     }
-    
+
     setCameraError(errorMessage);
   };
 
@@ -119,11 +117,11 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
   // Chuyển đổi camera (front/back) trên mobile
   const switchCamera = useCallback(() => {
     if (!hasMultipleCameras) return;
-    
+
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newFacingMode);
     setCameraReady(false);
-    
+
     console.log(`📱 Chuyển camera: ${newFacingMode === 'user' ? 'trước' : 'sau'}`);
   }, [facingMode, hasMultipleCameras]);
 
@@ -150,7 +148,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
       width: isMobile ? 720 : 640,
       height: isMobile ? 1280 : 480
     });
-    
+
     if (imageSrc) {
       setCapturedImage(imageSrc);
       console.log('📸 Đã chụp ảnh', isMobile ? '(Mobile)' : '(Desktop)');
@@ -188,7 +186,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     setCameraReady(false);
     setCapturedImage(null);
     setIsCheckingCamera(true);
-    
+
     // Test lại camera
     testCameraAccess()
       .then(() => setIsCheckingCamera(false))
@@ -230,9 +228,9 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
               Hãy thử sử dụng Chrome, Firefox, Safari hoặc Edge phiên bản mới nhất
             </p>
           )}
-          <Button 
-            onClick={retryCamera} 
-            className="mt-2" 
+          <Button
+            onClick={retryCamera}
+            className="mt-2"
             size="sm"
           >
             Thử lại
@@ -241,9 +239,8 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
       ) : (
         <div className="space-y-4">
           {/* Preview Camera hoặc Ảnh đã chụp */}
-          <div className={`relative bg-black rounded-lg overflow-hidden ${
-            isMobile ? 'aspect-[9/16]' : 'aspect-video'
-          }`}>
+          <div className={`relative bg-black rounded-lg overflow-hidden ${isMobile ? 'aspect-[9/16]' : 'aspect-video'
+            }`}>
             {!capturedImage ? (
               <>
                 <Webcam
@@ -256,7 +253,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
                   className="w-full h-full object-cover"
                   mirrored={facingMode === 'user'}
                 />
-                
+
                 {/* Camera switching cho mobile */}
                 {isMobile && hasMultipleCameras && cameraReady && (
                   <button
@@ -267,7 +264,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
                     <RotateCcw className="w-5 h-5" />
                   </button>
                 )}
-                
+
                 {!cameraReady && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="text-white text-center">
@@ -280,9 +277,11 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
                 )}
               </>
             ) : (
-              <img
+              <Image
                 src={capturedImage}
                 alt="Ảnh đã chụp"
+                width={1280}
+                height={720}
                 className="w-full h-full object-cover"
               />
             )}
@@ -338,7 +337,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
           {/* Thông tin debug cho mobile */}
           {isMobile && cameraReady && (
             <div className="text-xs text-center text-gray-500">
-              Camera: {facingMode === 'user' ? 'Trước' : 'Sau'} • 
+              Camera: {facingMode === 'user' ? 'Trước' : 'Sau'} •
               Độ phân giải: {videoConstraints.width}x{videoConstraints.height}
             </div>
           )}
