@@ -10,7 +10,7 @@ export function useManualAttendance() {
     console.log('🎯 Bắt đầu quá trình điểm danh...');
     
     if (!user) {
-      console.log('❌ Không có user');
+      console.log('❌ Không có thông tin người dùng');
       setAttendanceStatus('error');
       return;
     }
@@ -18,7 +18,7 @@ export function useManualAttendance() {
     const userEmail = user.emailAddresses[0]?.emailAddress;
     
     if (!userEmail) {
-      console.log('❌ Không có email');
+      console.log('❌ Không có thông tin email');
       setAttendanceStatus('error');
       return;
     }
@@ -49,13 +49,12 @@ export function useManualAttendance() {
 
       // Nếu đã điểm danh hôm nay
       if (checkResult.hasCheckedInToday) {
-        console.log('⚠️ Đã điểm danh hôm nay:', checkResult.todayRecord);
+        console.log('⚠️ Đã điểm danh hôm nay');
         setAttendanceStatus('already_checked_in');
         return;
       }
 
       // Nếu chưa điểm danh → chuyển sang chế độ camera
-      console.log('✅ Chưa điểm danh, chuyển sang camera...');
       setAttendanceStatus('camera');
       
     } catch (error) {
@@ -68,7 +67,7 @@ export function useManualAttendance() {
     console.log('📸 Đã nhận được ảnh, bắt đầu xử lý...');
     
     if (!user) {
-      console.log('❌ Không có user');
+      console.log('❌ Không có thông tin người dùng');
       setAttendanceStatus('error');
       return;
     }
@@ -76,7 +75,7 @@ export function useManualAttendance() {
     const userEmail = user.emailAddresses[0]?.emailAddress;
     
     if (!userEmail) {
-      console.log('❌ Không có email');
+      console.log('❌ Không có thông tin email');
       setAttendanceStatus('error');
       return;
     }
@@ -101,7 +100,7 @@ export function useManualAttendance() {
         throw new Error(uploadResult.error || 'Lỗi khi upload ảnh');
       }
 
-      console.log('✅ Upload ảnh thành công:', uploadResult.viewLink);
+      console.log('✅ Upload ảnh thành công');
       
       // Gửi thông tin điểm danh kèm link ảnh
       setAttendanceStatus('sending');

@@ -48,7 +48,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
         // Kiểm tra danh sách camera có sẵn
         const videoDevices = await safeEnumerateDevices();
 
-        console.log('📹 Phát hiện camera:', videoDevices.length);
+
         setHasMultipleCameras(videoDevices.length > 1);
 
         // Thử truy cập camera để kiểm tra quyền
@@ -79,7 +79,6 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
       // Dừng stream ngay sau khi test
       stream.getTracks().forEach(track => track.stop());
-      console.log('✅ Camera access test thành công');
       return true;
 
     } catch (error: unknown) {
@@ -126,13 +125,11 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     setFacingMode(newFacingMode);
     setCameraReady(false);
 
-    console.log(`📱 Chuyển camera: ${newFacingMode === 'user' ? 'trước' : 'sau'}`);
+
   }, [facingMode, hasMultipleCameras]);
 
   // Xử lý khi camera sẵn sàng
-  const handleUserMedia = useCallback((stream: MediaStream) => {
-    console.log('✅ Camera đã sẵn sàng với getUserMedia');
-    console.log('📹 Stream settings:', stream.getVideoTracks()[0]?.getSettings());
+  const handleUserMedia = useCallback(() => {
     setCameraReady(true);
     setCameraError(null);
   }, []);
@@ -155,14 +152,12 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
     if (imageSrc) {
       setCapturedImage(imageSrc);
-      console.log('📸 Đã chụp ảnh chất lượng cao', isMobile ? '(Mobile)' : '(Desktop)', 
-                  `- Độ phân giải: ${optimalRes.width}x${optimalRes.height}`,
-                  `- Chất lượng: ${Math.round(optimalRes.quality * 100)}%`);
+      console.log('📸 Đã chụp ảnh');
     } else {
       console.error('❌ Không thể chụp ảnh');
       setCameraError('Không thể chụp ảnh. Vui lòng thử lại.');
     }
-  }, [cameraReady, isMobile, optimalRes]);
+  }, [cameraReady, optimalRes]);
 
   // Chụp lại
   const retakePhoto = useCallback(() => {
@@ -177,7 +172,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     fetch(capturedImage)
       .then(res => res.blob())
       .then(blob => {
-        console.log('✅ Đã chuyển đổi ảnh thành blob');
+  
         onCapture(blob);
       })
       .catch(error => {

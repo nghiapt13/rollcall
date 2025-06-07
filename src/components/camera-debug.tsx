@@ -39,17 +39,14 @@ export function CameraDebug() {
 
     try {
       // 1. Check basic support
-      console.log('🔍 Checking camera support...');
       
       // 2. Check permissions
       if (navigator.permissions) {
         try {
           const permission = await navigator.permissions.query({ name: 'camera' as PermissionName });
           info.permissions = permission.state;
-          console.log('📋 Camera permission:', permission.state);
-        } catch (e) {
+        } catch {
           info.permissions = 'check_failed';
-          console.log('⚠️ Permission check failed:', e);
         }
       }
 

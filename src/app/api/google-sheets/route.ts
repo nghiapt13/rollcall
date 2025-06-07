@@ -7,11 +7,6 @@ export async function POST(request: NextRequest) {
         const { email, name, loginTime, userId, photoLink } = await request.json();
 
         console.log('=== ĐIỂM DANH API ===');
-        console.log('Email:', email);
-        console.log('Name:', name);
-        console.log('LoginTime:', loginTime);
-        console.log('UserId:', userId);
-        console.log('PhotoLink:', photoLink);
 
         if (!email) {
             return NextResponse.json(
@@ -23,7 +18,6 @@ export async function POST(request: NextRequest) {
         // Kiểm tra quyền truy cập
         if (!userId || !isAuthorizedUser(userId)) {
             console.log('❌ CHẶN: Không có quyền truy cập');
-            console.log('UserId hiện tại:', userId);
             return NextResponse.json({
                 success: false,
                 error: 'unauthorized',
@@ -73,7 +67,7 @@ export async function POST(request: NextRequest) {
             const rowEmail = row[0];
             const rowLoginTime = row[2];
 
-            console.log(`Dòng ${i}:`, { email: rowEmail, loginTime: rowLoginTime });
+            
 
             if (rowEmail === email && rowLoginTime) {
                 try {

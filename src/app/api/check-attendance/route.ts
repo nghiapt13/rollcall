@@ -5,7 +5,7 @@ export async function POST(request: NextRequest) {
     try {
         const { email, userId } = await request.json();
 
-        console.log('🔍 Kiểm tra trạng thái chấm công:', { email, userId });
+        console.log('🔍 Kiểm tra trạng thái chấm công');
 
         if (!email || !userId) {
             return NextResponse.json({

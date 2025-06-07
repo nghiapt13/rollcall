@@ -136,10 +136,7 @@ export const safeGetUserMedia = async (constraints: MediaStreamConstraints): Pro
     // Điều chỉnh constraints cho mobile
     const adjustedConstraints = adjustConstraintsForMobile(constraints);
     
-    console.log('🎥 Đang truy cập camera với constraints:', adjustedConstraints);
     const stream = await navigator.mediaDevices.getUserMedia(adjustedConstraints);
-    
-    console.log('✅ Camera đã được truy cập thành công');
     return stream;
     
   } catch (error: unknown) {
@@ -293,7 +290,6 @@ export const testCameraAccess = async (): Promise<boolean> => {
 export const getAvailableCameras = async (): Promise<MediaDeviceInfo[]> => {
   try {
     const devices = await safeEnumerateDevices();
-    console.log(`📹 Tìm thấy ${devices.length} camera`);
     return devices;
   } catch (error) {
     console.error('❌ Không thể lấy danh sách camera:', error);

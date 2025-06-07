@@ -7,8 +7,6 @@ export async function POST(request: NextRequest) {
         const { userId, confirmCode } = await request.json();
 
         console.log('=== XÓA DỮ LIỆU CHẤM CÔNG ===');
-        console.log('UserId:', userId);
-        console.log('ConfirmCode:', confirmCode);
 
         // Kiểm tra quyền truy cập
         if (!userId || !isAuthorizedUser(userId)) {
