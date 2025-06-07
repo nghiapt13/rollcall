@@ -158,16 +158,26 @@ const adjustConstraintsForMobile = (constraints: MediaStreamConstraints): MediaS
   
   // Điều chỉnh cho mobile
   if (CameraEnvironment.isMobile()) {
-    // Giảm resolution cho mobile
-    if (videoConstraints.width && typeof videoConstraints.width === 'object') {
-      videoConstraints.width = { ideal: 720 };
-    }
-    if (videoConstraints.height && typeof videoConstraints.height === 'object') {
-      videoConstraints.height = { ideal: 1280 };
+    // Độ phân giải tối ưu cho mobile (tránh lag)
+    if (CameraEnvironment.isAndroid()) {
+      // Android: Độ phân giải vừa phải
+      videoConstraints.width = { ideal: 480, max: 720 };
+      videoConstraints.height = { ideal: 640, max: 960 };
+    } else if (CameraEnvironment.isIOS()) {
+      // iOS: Có thể xử lý độ phân giải cao hơn
+      videoConstraints.width = { ideal: 540, max: 720 };
+      videoConstraints.height = { ideal: 960, max: 1280 };
+    } else {
+      // Mobile khác: Độ phân giải thấp để đảm bảo tương thích
+      videoConstraints.width = { ideal: 480, max: 640 };
+      videoConstraints.height = { ideal: 640, max: 800 };
     }
     
-    // Giảm frame rate
-    videoConstraints.frameRate = { ideal: 15, max: 30 };
+    // Frame rate thấp để tiết kiệm pin và băng thông
+    videoConstraints.frameRate = { ideal: 12, max: 20 };
+    
+    // Các tối ưu khác cho mobile
+    videoConstraints.aspectRatio = { ideal: 3/4 }; // Tỷ lệ phù hợp với portrait
   }
 
   // Loại bỏ constraints không hỗ trợ trên một số thiết bị
@@ -175,6 +185,13 @@ const adjustConstraintsForMobile = (constraints: MediaStreamConstraints): MediaS
     // iOS Safari có thể không hỗ trợ một số constraints
     delete (videoConstraints as Record<string, unknown>).focusMode;
     delete (videoConstraints as Record<string, unknown>).zoom;
+    delete (videoConstraints as Record<string, unknown>).torch;
+  }
+  
+  // Android có thể không hỗ trợ một số tính năng
+  if (CameraEnvironment.isAndroid()) {
+    delete (videoConstraints as Record<string, unknown>).exposureMode;
+    delete (videoConstraints as Record<string, unknown>).whiteBalanceMode;
   }
 
   return {
@@ -293,4 +310,28 @@ export const hasMultipleCameras = async (): Promise<boolean> => {
     console.warn('⚠️ Không thể kiểm tra số lượng camera:', error);
     return false;
   }
+};
+
+// Lấy độ phân giải tối ưu cho thiết bị
+export const getOptimalResolution = () => {
+  if (!CameraEnvironment.isMobile()) {
+    return { width: 640, height: 480, quality: 0.8 };
+  }
+  
+  // Mobile: độ phân giải tối ưu theo từng platform
+  if (CameraEnvironment.isAndroid()) {
+    return { width: 480, height: 640, quality: 0.75 };
+  } else if (CameraEnvironment.isIOS()) {
+    return { width: 540, height: 720, quality: 0.8 };
+  } else {
+    return { width: 480, height: 640, quality: 0.7 };
+  }
+};
+
+// Tối ưu hóa ảnh cho mobile (giảm dung lượng)
+export const optimizeImageForMobile = (canvas: HTMLCanvasElement): string => {
+  const { quality } = getOptimalResolution();
+  
+  // Sử dụng JPEG với chất lượng thấp hơn cho mobile để giảm dung lượng
+  return canvas.toDataURL('image/jpeg', quality);
 }; 

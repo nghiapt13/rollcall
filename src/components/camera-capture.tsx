@@ -10,6 +10,7 @@ import {
   safeGetUserMedia, 
   safeEnumerateDevices, 
   testCameraAccess,
+  getOptimalResolution
 
 } from '@/lib/camera-utils';
 
@@ -70,8 +71,9 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
       const stream = await safeGetUserMedia({
         video: {
           facingMode: 'user',
-          width: { ideal: CameraEnvironment.isMobile() ? 720 : 640 },
-          height: { ideal: CameraEnvironment.isMobile() ? 1280 : 480 }
+          // Để camera-utils tự động điều chỉnh độ phân giải
+          width: { ideal: 640 },
+          height: { ideal: 480 }
         }
       });
 
@@ -106,12 +108,14 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     setCameraError(errorMessage);
   };
 
-  // Cấu hình video cho react-webcam
+  // Cấu hình video cho react-webcam (được điều chỉnh bởi camera-utils)
+  const optimalRes = getOptimalResolution();
   const videoConstraints = {
-    width: isMobile ? 720 : 640,
-    height: isMobile ? 1280 : 480,
+    width: optimalRes.width,
+    height: optimalRes.height,
     facingMode: facingMode,
-    frameRate: isMobile ? 15 : 30
+    frameRate: isMobile ? 12 : 25, // Frame rate thấp hơn cho mobile
+    aspectRatio: isMobile ? 3/4 : 4/3
   };
 
   // Chuyển đổi camera (front/back) trên mobile
@@ -145,18 +149,19 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     if (!webcamRef.current || !cameraReady) return;
 
     const imageSrc = webcamRef.current.getScreenshot({
-      width: isMobile ? 720 : 640,
-      height: isMobile ? 1280 : 480
+      width: optimalRes.width,
+      height: optimalRes.height
     });
 
     if (imageSrc) {
       setCapturedImage(imageSrc);
-      console.log('📸 Đã chụp ảnh', isMobile ? '(Mobile)' : '(Desktop)');
+      console.log('📸 Đã chụp ảnh', isMobile ? '(Mobile)' : '(Desktop)', 
+                  `- Độ phân giải: ${optimalRes.width}x${optimalRes.height}`);
     } else {
       console.error('❌ Không thể chụp ảnh');
       setCameraError('Không thể chụp ảnh. Vui lòng thử lại.');
     }
-  }, [cameraReady, isMobile]);
+  }, [cameraReady, isMobile, optimalRes]);
 
   // Chụp lại
   const retakePhoto = useCallback(() => {
@@ -338,7 +343,8 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
           {isMobile && cameraReady && (
             <div className="text-xs text-center text-gray-500">
               Camera: {facingMode === 'user' ? 'Trước' : 'Sau'} •
-              Độ phân giải: {videoConstraints.width}x{videoConstraints.height}
+              Độ phân giải: {videoConstraints.width}x{videoConstraints.height} •
+              FPS: {videoConstraints.frameRate}
             </div>
           )}
         </div>
