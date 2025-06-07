@@ -15,10 +15,14 @@ export async function POST(request: NextRequest) {
         }
 
         // Cấu hình Google Sheets API
+        const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n')
+            .replace(/"/g, '')
+            .trim();
+            
         const auth = new google.auth.GoogleAuth({
             credentials: {
                 client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                private_key: privateKey,
             },
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
