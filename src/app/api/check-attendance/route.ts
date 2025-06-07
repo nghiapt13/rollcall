@@ -33,10 +33,10 @@ export async function POST(request: NextRequest) {
                 spreadsheetId,
                 range: 'Sheet1!A:E',
             }),
-            new Promise((_, reject) => 
+            new Promise<never>((_, reject) => 
                 setTimeout(() => reject(new Error('Timeout after 30 seconds')), 30000)
             )
-        ]) as any;
+        ]);
 
         const rows = response.data.values || [];
         console.log('📊 Tổng số dòng trong sheet:', rows.length);

@@ -24,8 +24,8 @@ export async function GET() {
                 }
             },
             
-            authTest: null as any,
-            sheetsTest: null as any,
+            authTest: null as { success: true; clientType: string; hasAccessToken: boolean; tokenLength: number } | { success: false; error: string; errorType: string } | null,
+            sheetsTest: null as { success: true; sheetTitle?: string; canRead: boolean; canReadValues?: boolean; headerRow?: unknown[] } | { success: false; error: string; errorType: string } | null,
             error: null as string | null
         };
 
@@ -79,20 +79,19 @@ export async function GET() {
                     fields: 'properties.title'
                 });
 
-                debugInfo.sheetsTest = {
-                    success: true,
-                    sheetTitle: response.data.properties?.title,
-                    canRead: true
-                };
-
                 // Test đọc dữ liệu
                 const valuesResponse = await sheets.spreadsheets.values.get({
                     spreadsheetId: process.env.GOOGLE_SHEET_ID,
                     range: 'Sheet1!A1:E1',
                 });
 
-                debugInfo.sheetsTest.canReadValues = true;
-                debugInfo.sheetsTest.headerRow = valuesResponse.data.values?.[0] || [];
+                debugInfo.sheetsTest = {
+                    success: true,
+                    sheetTitle: response.data.properties?.title ?? undefined,
+                    canRead: true,
+                    canReadValues: true,
+                    headerRow: valuesResponse.data.values?.[0] || []
+                };
 
                 console.log('✅ Sheets API test successful');
 
