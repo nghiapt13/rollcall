@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { google } from 'googleapis';
-import { isAuthorizedUser } from '@/config/authorized-users';
+import { isAdminUser } from '@/config/authorized-users';
 
 export async function POST(request: NextRequest) {
     try {
-        const { userId, confirmCode } = await request.json();
+        const { email, confirmCode } = await request.json();
 
         console.log('=== XÓA DỮ LIỆU CHẤM CÔNG ===');
 
-        // Kiểm tra quyền truy cập
-        if (!userId || !isAuthorizedUser(userId)) {
-            console.log('❌ CHẶN: Không có quyền truy cập');
+        // Kiểm tra quyền admin bằng email
+        if (!email || !isAdminUser(email)) {
+            console.log('❌ CHẶN: Không có quyền admin');
             return NextResponse.json({
                 success: false,
-                error: 'Bạn không có quyền thực hiện thao tác này. Vui lòng liên hệ quản trị viên.',
+                error: 'Bạn không có quyền admin. Vui lòng liên hệ quản trị viên.',
                 unauthorized: true
             }, { status: 403 });
         }
@@ -38,12 +38,10 @@ export async function POST(request: NextRequest) {
         const sheets = google.sheets({ version: 'v4', auth });
         const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
-        console.log('🔍 Đang kiểm tra dữ liệu hiện tại...');
-
         // Đọc dữ liệu từ sheet để đếm số dòng
         const response = await sheets.spreadsheets.values.get({
             spreadsheetId,
-            range: 'Sheet1!A:E',
+            range: 'Sheet1!A:G',
         });
 
         const rows = response.data.values || [];
@@ -61,10 +59,10 @@ export async function POST(request: NextRequest) {
         // Xóa tất cả dữ liệu trừ header (dòng đầu tiên)
         const startRow = 2; // Dòng thứ 2 (sau header)
         const endRow = rows.length; // Dòng cuối cùng
-        const deleteRange = `Sheet1!A${startRow}:E${endRow}`;
-
+        const deleteRange = `Sheet1!A${startRow}:F${endRow}`; // Thay đổi từ E thành F
+    
         console.log(`🗑️ Đang xóa dòng từ ${startRow} đến ${endRow}...`);
-
+    
         await sheets.spreadsheets.values.clear({
             spreadsheetId,
             range: deleteRange,
@@ -88,4 +86,4 @@ export async function POST(request: NextRequest) {
             error: 'Lỗi server: ' + (error as Error).message
         }, { status: 500 });
     }
-} 
+}

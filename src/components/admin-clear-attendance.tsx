@@ -49,7 +49,7 @@ export function AdminClearAttendance() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: user.id,
+          email: user.emailAddresses[0]?.emailAddress, // Gửi email thay vì userId
           confirmCode: confirmCode.trim()
         }),
       });
@@ -252,4 +252,4 @@ export function AdminClearAttendance() {
       </CardContent>
     </Card>
   );
-} 
+}

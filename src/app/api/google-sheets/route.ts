@@ -4,9 +4,19 @@ import { isAuthorizedUser } from '@/config/authorized-users';
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, name, loginTime, userId, photoLink } = await request.json();
+        const { email, name, userId, photoLink } = await request.json();
 
-        console.log('=== ĐIỂM DANH API ===');
+        console.log('📨 Nhận dữ liệu:', { email, name, userId, photoLink });
+
+        // Kiểm tra quyền truy cập bằng email
+        if (!email || !isAuthorizedUser(email)) {
+            console.log('🚫 Không có quyền truy cập:', email);
+            return NextResponse.json({
+                success: false,
+                error: 'Không có quyền truy cập',
+                unauthorized: true
+            }, { status: 403 });
+        }
 
         if (!email) {
             return NextResponse.json(
@@ -15,16 +25,16 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Kiểm tra quyền truy cập
-        if (!userId || !isAuthorizedUser(userId)) {
-            console.log('❌ CHẶN: Không có quyền truy cập');
-            return NextResponse.json({
-                success: false,
-                error: 'unauthorized',
-                message: 'Bạn không có quyền điểm danh. Vui lòng liên hệ quản trị viên.',
-                unauthorized: true
-            }, { status: 403 });
-        }
+        // XÓA BỎ ĐOẠN CODE SAI NÀY:
+        // if (!userId || !isAuthorizedUser(userId)) {
+        //     console.log('❌ CHẶN: Không có quyền truy cập');
+        //     return NextResponse.json({
+        //         success: false,
+        //         error: 'unauthorized',
+        //         message: 'Bạn không có quyền điểm danh. Vui lòng liên hệ quản trị viên.',
+        //         unauthorized: true
+        //     }, { status: 403 });
+        // }
 
         // Cấu hình Google Sheets API
         const auth = new google.auth.GoogleAuth({
@@ -121,14 +131,13 @@ export async function POST(request: NextRequest) {
         const newRow = [
             email,
             name,
-            loginTime,
             new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
             photoLink || 'Không có ảnh'
         ];
 
         await sheets.spreadsheets.values.append({
             spreadsheetId,
-            range: 'Sheet1!A:E',
+            range: 'Sheet1!A:D',
             valueInputOption: 'RAW',
             requestBody: {
                 values: [newRow],

@@ -1,3 +1,5 @@
+"use client";
+
 import { AdminClearAttendance } from '@/components/admin-clear-attendance';
 import { Settings, Users, Database } from 'lucide-react';
 
@@ -66,12 +68,11 @@ export default function AdminPage() {
           <h3 className="font-semibold text-gray-800 mb-2">📖 Hướng dẫn sử dụng</h3>
           <div className="text-sm text-gray-600 space-y-1">
             <p>• <strong>Xóa dữ liệu chấm công:</strong> Xóa tất cả bản ghi chấm công của mọi người dùng</p>
-            <p>• <strong>Yêu cầu xác nhận:</strong> Phải nhập mã xác nhận chính xác để thực hiện</p>
-            <p>• <strong>Không thể hoàn tác:</strong> Dữ liệu bị xóa sẽ không thể khôi phục</p>
-            <p>• <strong>Quyền truy cập:</strong> Chỉ tài khoản được ủy quyền mới thực hiện được</p>
+            <p>• <strong>Quản lý người dùng:</strong> Thêm email vào file .env để cấp quyền chấm công</p>
+            <p>• <strong>Quản lý admin:</strong> Thêm email vào NEXT_PUBLIC_AUTHORIZED_ADMIN_EMAILS trong .env</p>
           </div>
         </div>
       </div>
     </div>
   );
-} 
+}

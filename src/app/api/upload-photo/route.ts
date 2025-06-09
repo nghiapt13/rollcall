@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const file = formData.get('photo') as File;
         const userEmail = formData.get('userEmail') as string;
+        const type = formData.get('type') as string || 'checkin'; // Mặc định là checkin
 
         if (!file || !userEmail) {
             return NextResponse.json(
@@ -18,11 +19,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Tạo tên file với type
+        const timestamp = new Date().toLocaleString('vi-VN', { 
+            timeZone: 'Asia/Ho_Chi_Minh' 
+        }).replace(/[/:]/g, '-').replace(/\s/g, '_');
+
+        const fileName = `${type}_${userEmail}_${timestamp}.jpg`;
+
         console.log('📁 File info:', {
             name: file.name,
             size: file.size,
             type: file.type,
-            userEmail: userEmail
+            userEmail: userEmail,
+            fileName: fileName
         });
 
         // Cấu hình Google Drive API
@@ -38,13 +47,6 @@ export async function POST(request: NextRequest) {
         });
 
         const drive = google.drive({ version: 'v3', auth });
-
-        // Tạo tên file với timestamp
-        const timestamp = new Date().toLocaleString('vi-VN', { 
-            timeZone: 'Asia/Ho_Chi_Minh' 
-        }).replace(/[/:]/g, '-').replace(/\s/g, '_');
-        
-        const fileName = `chamcong_${userEmail}_${timestamp}.jpg`;
 
         console.log('☁️ Đang upload lên Google Drive...');
 
@@ -116,4 +118,4 @@ export async function POST(request: NextRequest) {
             { status: 500 }
         );
     }
-} 
+}

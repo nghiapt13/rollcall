@@ -32,7 +32,6 @@ export function useLoginTracker() {
             const loginData = {
               email: userEmail,
               name: user.fullName || 'N/A',
-              loginTime: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
               userId: user.id
             };
 
@@ -62,4 +61,4 @@ export function useLoginTracker() {
   }, [isSignedIn]);
 
   return { trackingStatus };
-} 
+}

@@ -16,7 +16,9 @@ export function AttendanceButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Kiểm tra quyền truy cập
-  const hasPermission = user?.id ? isAuthorizedUser(user.id) : false;
+  // Thay đổi từ user.id sang email
+  const userEmail = user?.emailAddresses[0]?.emailAddress;
+  const hasPermission = userEmail ? isAuthorizedUser(userEmail) : false;
 
   // Nếu đang kiểm tra trạng thái ban đầu
   if (statusLoading) {
@@ -57,7 +59,7 @@ export function AttendanceButton() {
     return (
       <Button disabled size="lg" className="px-6 py-3 bg-green-600">
         <CheckCircle2 className="w-4 h-4 mr-2" />
-        Đã điểm danh hôm nay
+        Đã check-in hôm nay
       </Button>
     );
   }
@@ -82,7 +84,7 @@ export function AttendanceButton() {
         ) : (
           <>
             <CheckCircle className="w-4 h-4 mr-2" />
-            Chấm công
+            Check-in
           </>
         )}
       </Button>
@@ -104,4 +106,4 @@ export function AttendanceButton() {
       />
     </div>
   );
-} 
+}

@@ -60,18 +60,17 @@ export async function POST(request: NextRequest) {
         let hasCheckedInToday = false;
         let todayRecord = null;
 
-        for (let i = 1; i < rows.length; i++) { // Bỏ qua header
+        for (let i = 1; i < rows.length; i++) {
             const row = rows[i];
             const rowEmail = row[0];
             const rowName = row[1];
-            const rowLoginTime = row[2];
-            const rowTimestamp = row[3];
-            const rowPhotoLink = row[4];
+            const rowTimestamp = row[2];
+            const rowPhotoLink = row[3];
 
-            if (rowEmail === email && rowLoginTime) {
+            if (rowEmail === email && rowTimestamp) {
                 try {
-                    // Parse ngày từ rowLoginTime
-                    const dateMatch = rowLoginTime.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                    // Parse ngày từ rowTimestamp
+                    const dateMatch = rowTimestamp.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
                     
                     if (dateMatch) {
                         const [, day, month, year] = dateMatch;
@@ -89,7 +88,6 @@ export async function POST(request: NextRequest) {
                             todayRecord = {
                                 email: rowEmail,
                                 name: rowName,
-                                loginTime: rowLoginTime,
                                 timestamp: rowTimestamp,
                                 photoLink: rowPhotoLink,
                                 rowIndex: i + 1
@@ -111,8 +109,8 @@ export async function POST(request: NextRequest) {
             checkDate: todayString,
             totalRecords: rows.length - 1, // Trừ header
             message: hasCheckedInToday 
-                ? 'Đã chấm công hôm nay' 
-                : 'Chưa chấm công hôm nay'
+                ? 'Đã check-in hôm nay' 
+                : 'Chưa check-in hôm nay'
         });
 
     } catch (error: unknown) {
@@ -160,4 +158,4 @@ export async function POST(request: NextRequest) {
             }
         }, { status: 500 });
     }
-} 
+}
