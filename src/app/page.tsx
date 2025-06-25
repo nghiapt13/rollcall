@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { isAdminUser } from '@/config/authorized-users';
 import { CheckoutButton } from "@/components/checkout-button";
 import { useAttendanceStatus } from "@/hooks/use-attendance-status";
 import { UserProfile } from "@/components/user-profile";
+import { Instruction } from "@/components/instruction"; // Thêm import
 
 export default function Home() {
   const { user, isSignedIn } = useUser();
@@ -19,7 +20,6 @@ export default function Home() {
   // Kiểm tra quyền admin bằng email
   const userEmail = user?.emailAddresses[0]?.emailAddress;
   const isAdmin = userEmail ? isAdminUser(userEmail) : false;
-
 
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-20">
@@ -44,18 +44,6 @@ export default function Home() {
         <div className="flex flex-col items-center gap-4">
           {/* User Profile Component */}
           <UserProfile className="mb-2" />
-          
-          <div className="text-sm sm:text-md font-medium text-center">
-            Bây giờ là {new Date().toLocaleString('vi-VN', {
-              timeZone: 'Asia/Ho_Chi_Minh', 
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: false,
-              day: '2-digit', 
-              month: '2-digit',
-              year: 'numeric'
-            })}
-          </div>
           
           <AttendanceButton />
           
@@ -96,6 +84,9 @@ export default function Home() {
               Đăng xuất
             </Button>
           </div>
+          
+          {/* Instruction Component - Thêm dưới nút đăng xuất */}
+          <Instruction />
         </div>
       )}
     </div>
