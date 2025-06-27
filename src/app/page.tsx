@@ -85,8 +85,14 @@ export default function Home() {
             </Button>
           </div>
           
-          {/* Instruction Component - Thêm dưới nút đăng xuất */}
           <Instruction />
+
+          <Button asChild size="sm" variant="outline" className="border-black">
+            <Link href="https://m.me/Nghia.PT21" target="_blank">
+              <Image src="/messenger.svg" alt="Messenger" width={15} height={15} />
+              Báo lỗi
+            </Link>
+          </Button>
         </div>
       )}
     </div>
