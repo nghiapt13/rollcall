@@ -1,6 +1,7 @@
-"use client";
+'use client';
 
 import { AdminClearAttendance } from '@/components/admin-clear-attendance';
+import { ViewGoogleSheets } from '@/components/view-google-sheets';
 import { Settings, Users, Database } from 'lucide-react';
 
 export default function AdminPage() {
@@ -59,6 +60,11 @@ export default function AdminPage() {
             Quản lý dữ liệu
           </h2>
           
+          {/* Nút xem Google Sheets */}
+          <div className="mb-4">
+            <ViewGoogleSheets />
+          </div>
+          
           {/* Component xóa dữ liệu chấm công */}
           <AdminClearAttendance />
         </div>
@@ -67,6 +73,7 @@ export default function AdminPage() {
         <div className="mt-8 p-4 bg-gray-50 rounded-lg border">
           <h3 className="font-semibold text-gray-800 mb-2">📖 Hướng dẫn sử dụng</h3>
           <div className="text-sm text-gray-600 space-y-1">
+            <p>• <strong>Xem dữ liệu:</strong> Xem toàn bộ dữ liệu chấm công trên Google Sheets</p>
             <p>• <strong>Xóa dữ liệu chấm công:</strong> Xóa tất cả bản ghi chấm công của mọi người dùng</p>
             <p>• <strong>Quản lý người dùng:</strong> Thêm email vào file .env để cấp quyền chấm công</p>
             <p>• <strong>Quản lý admin:</strong> Thêm email vào NEXT_PUBLIC_AUTHORIZED_ADMIN_EMAILS trong .env</p>
