@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FPI RollCall",
+  title: "Chấm công hàng ngày - Phòng CTSV FPI Đà Nẵng",
   description: "Hệ thống chấm công dành cho CB FPI - BTEC ĐN",
 };
 

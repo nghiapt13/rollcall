@@ -22,7 +22,7 @@ export default function Home() {
   const isAdmin = userEmail ? isAdminUser(userEmail) : false;
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-20">
+    <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-15">
       <Image
         src="/2020-Btec.png"
         alt="BTEC"
@@ -30,7 +30,9 @@ export default function Home() {
         height={250}
         className=""
       />
-      <h1 className="text-3xl font-bold text-orange-500 align-center mb-2">CHẤM CÔNG NGÀY - FPI</h1>
+      <h1 className="text-3xl font-bold text-orange-500 align-center">CHẤM CÔNG HÀNG NGÀY</h1>
+      <h1 className="text-xl font-bold text-orange-500 align-center">PHÒNG CTSV FPI ĐÀ NẴNG</h1>
+
 
       {!isSignedIn ? (
         <Button

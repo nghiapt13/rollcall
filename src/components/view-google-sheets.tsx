@@ -9,12 +9,17 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import { ExternalLink, Table } from 'lucide-react';
+import { ExternalLink, Table, RefreshCw } from 'lucide-react';
 
 export function ViewGoogleSheets() {
     const [isOpen, setIsOpen] = useState(false);
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS6XEgO1PNm9vGIYPaTzC-w7c690Bw49RQkmvmuOwiSKhgSgzo26CXJQ7PqZF8bxPjMZufYrx8nroVw/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false";
-    const directSheetUrl = "https://docs.google.com/spreadsheets/d/1S3Nes0S9l_qLV_sgsHTDDCdVYKapD51zWz77QzOTNYs/edit?usp=sharing";
+    const [reloadKey, setReloadKey] = useState(0);
+    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2PDr-5t__PkBsaZouAuzXJXMyb7GCdWj1DtSmuTpXzg36doRTnQfvtNR2pjBXI2OpQbZF9Qns3fKF/pubhtml?widget=true&amp;headers=false";
+    const directSheetUrl = "https://docs.google.com/spreadsheets/d/1T-Cw1pHl2cNbJGDUhdRpKfBNqZNje8Je2RcXrTpHQMI/edit?usp=sharing";
+
+    const handleReload = () => {
+        setReloadKey(prev => prev + 1);
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -35,20 +40,32 @@ export function ViewGoogleSheets() {
                             <Table className="w-5 h-5 text-green-600" />
                             Dữ liệu chấm công - FPI DN
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.open(directSheetUrl, '_blank')}
-                            className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
-                        >
-                            <ExternalLink className="w-4 h-4" />
-                            Mở trong tab mới
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleReload}
+                                className="flex items-center gap-1 text-orange-600 hover:text-orange-800"
+                            >
+                                <RefreshCw className="w-4 h-4" />
+                                Tải lại
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => window.open(directSheetUrl, '_blank')}
+                                className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
+                            >
+                                <ExternalLink className="w-4 h-4" />
+                                Mở trong tab mới
+                            </Button>
+                        </div>
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="flex-1 border rounded-lg overflow-hidden" style={{ height: 'calc(90vh - 120px)' }}>
                     <iframe
+                        key={reloadKey}
                         src={sheetUrl}
                         className="w-full h-full border-0"
                         title="Google Sheets - Dữ liệu chấm công"
