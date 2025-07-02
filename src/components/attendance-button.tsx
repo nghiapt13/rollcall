@@ -16,7 +16,6 @@ export function AttendanceButton() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Kiểm tra quyền truy cập
-  // Thay đổi từ user.id sang email
   const userEmail = user?.emailAddresses[0]?.emailAddress;
   const hasPermission = userEmail ? isAuthorizedUser(userEmail) : false;
 
