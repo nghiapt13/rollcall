@@ -5,10 +5,10 @@ import { Camera, RotateCcw, Check, X, Smartphone, Monitor } from 'lucide-react';
 import { Button } from './ui/button';
 import Image from 'next/image';
 import Webcam from 'react-webcam';
-import { 
-  CameraEnvironment, 
-  safeGetUserMedia, 
-  safeEnumerateDevices, 
+import {
+  CameraEnvironment,
+  safeGetUserMedia,
+  safeEnumerateDevices,
   testCameraAccess,
 
 } from '@/lib/camera-utils';
@@ -110,10 +110,10 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
   // Cấu hình video cho react-webcam (sử dụng chất lượng gốc)
   const videoConstraints = {
-  // Xóa các giới hạn width và height để sử dụng độ phân giải gốc
-  facingMode: facingMode,
-  // Xóa frameRate để sử dụng frame rate mặc định của camera
-  // Xóa aspectRatio để sử dụng tỷ lệ gốc của camera
+    // Xóa các giới hạn width và height để sử dụng độ phân giải gốc
+    facingMode: facingMode,
+    // Xóa frameRate để sử dụng frame rate mặc định của camera
+    // Xóa aspectRatio để sử dụng tỷ lệ gốc của camera
   };
 
   // Chuyển đổi camera (front/back) trên mobile
@@ -169,7 +169,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
     fetch(capturedImage)
       .then(res => res.blob())
       .then(blob => {
-  
+
         onCapture(blob);
       })
       .catch(error => {
@@ -238,7 +238,9 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
         <div className="space-y-4">
           {/* Preview Camera hoặc Ảnh đã chụp */}
           <div className={`relative bg-black rounded-lg overflow-hidden ${
-            isMobile ? 'aspect-[9/16]' : 'aspect-video'
+            isMobile 
+              ? 'aspect-[3/4] max-h-[70vh] w-full' 
+              : 'aspect-video'
           }`}>
             {!capturedImage ? (
               <>
@@ -266,26 +268,29 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
 
                 {/* Nút điều khiển đè lên camera cho mobile */}
                 {isMobile && cameraReady && (
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
-                    <Button
-                      onClick={onCancel}
-                      variant="outline"
-                      disabled={isProcessing}
-                      size="lg"
-                      className="bg-black bg-opacity-50 text-white border-white hover:bg-opacity-70"
-                    >
-                      <X className="w-4 h-4 mr-2" />
-                      Hủy
-                    </Button>
-                    <Button
-                      onClick={capturePhoto}
-                      disabled={!cameraReady || isProcessing}
-                      size="lg"
-                      className="bg-blue-600 hover:bg-blue-700 bg-opacity-90 hover:bg-opacity-100"
-                    >
-                      <Camera className="w-4 h-4 mr-2" />
-                      Chụp ảnh
-                    </Button>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                    <div className=" backdrop-blur-md rounded-2xl p-3 border border-white/20 shadow-lg backdrop-saturate-150">
+                      <div className="flex space-x-3">
+                        <Button
+                          onClick={onCancel}
+                          disabled={isProcessing}
+                          size="lg"
+                          className="bg-white bg-opacity-20 text-white hover:bg-opacity-30 backdrop-blur-sm"
+                        >
+                          <X className="w-4 h-4 mr-2" />
+                          Hủy
+                        </Button>
+                        <Button
+                          onClick={capturePhoto}
+                          disabled={!cameraReady || isProcessing}
+                          size="lg"
+                          className="bg-blue-600 bg-opacity-80 hover:bg-blue-700 hover:bg-opacity-90 text-white backdrop-blur-sm"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Chụp ảnh
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -309,29 +314,33 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
                   height={720}
                   className="w-full h-full object-cover"
                 />
-                
+
                 {/* Nút điều khiển đè lên ảnh đã chụp cho mobile */}
                 {isMobile && (
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-3">
-                    <Button
-                      onClick={retakePhoto}
-                      variant="outline"
-                      disabled={isProcessing}
-                      size="lg"
-                      className="bg-black bg-opacity-50 text-white border-white hover:bg-opacity-70"
-                    >
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Chụp lại
-                    </Button>
-                    <Button
-                      onClick={confirmPhoto}
-                      disabled={isProcessing}
-                      size="lg"
-                      className="bg-green-600 hover:bg-green-700 bg-opacity-90 hover:bg-opacity-100"
-                    >
-                      <Check className="w-4 h-4 mr-2" />
-                      {isProcessing ? 'Đang xử lý...' : 'Xác nhận'}
-                    </Button>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                    <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl p-3 border border-white border-opacity-20">
+                      <div className="flex space-x-3">
+                        <Button
+                          onClick={retakePhoto}
+                          variant="outline"
+                          disabled={isProcessing}
+                          size="lg"
+                          className="bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30 backdrop-blur-sm"
+                        >
+                          <RotateCcw className="w-4 h-4 mr-2" />
+                          Chụp lại
+                        </Button>
+                        <Button
+                          onClick={confirmPhoto}
+                          disabled={isProcessing}
+                          size="lg"
+                          className="bg-green-600 bg-opacity-80 hover:bg-green-700 hover:bg-opacity-90 text-white backdrop-blur-sm"
+                        >
+                          <Check className="w-4 h-4 mr-2" />
+                          {isProcessing ? 'Đang xử lý...' : 'Xác nhận'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </>
