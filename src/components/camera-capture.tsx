@@ -318,11 +318,10 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
                 {/* Nút điều khiển đè lên ảnh đã chụp cho mobile */}
                 {isMobile && (
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-black bg-opacity-30 backdrop-blur-sm rounded-2xl p-3 border border-white border-opacity-20">
+                    <div className=" backdrop-blur-md rounded-2xl p-3 border border-white/20 shadow-lg backdrop-saturate-150">
                       <div className="flex space-x-3">
                         <Button
                           onClick={retakePhoto}
-                          variant="outline"
                           disabled={isProcessing}
                           size="lg"
                           className="bg-white bg-opacity-20 text-white border-white border-opacity-30 hover:bg-opacity-30 backdrop-blur-sm"

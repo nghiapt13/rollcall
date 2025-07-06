@@ -24,13 +24,13 @@ export default function Home() {
   const isAdmin = userEmail ? isAdminUser(userEmail) : false;
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-15">
+    <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-5">
       
       <Image
         src="/2020-Btec.png"
         alt="BTEC"
-        width={250}
-        height={250}
+        width={200}
+        height={200}
         className=""
       />
       <h1 className="text-3xl font-bold text-orange-500 align-center">CHẤM CÔNG HÀNG NGÀY</h1>
