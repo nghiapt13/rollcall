@@ -223,7 +223,7 @@ export function CameraCapture({ onCapture, onCancel, isProcessing }: CameraCaptu
           <p className="text-red-700 text-sm mb-3">{cameraError}</p>
           {!supportsGetUserMedia() && (
             <p className="text-xs text-red-600 mb-3">
-              Hãy thử sử dụng Chrome, Firefox, Safari hoặc Edge phiên bản mới nhất
+              Hãy thử sử dụng Chrome,hoặc Edge phiên bản mới nhất
             </p>
           )}
           <Button
