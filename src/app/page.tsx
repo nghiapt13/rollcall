@@ -10,7 +10,9 @@ import { isAdminUser } from '@/config/authorized-users';
 import { CheckoutButton } from "@/components/checkout-button";
 import { useAttendanceStatus } from "@/hooks/use-attendance-status";
 import { UserProfile } from "@/components/user-profile";
-import { Instruction } from "@/components/instruction"; // Thêm import
+import { Instruction } from "@/components/instruction";
+ // Thêm import
+
 
 export default function Home() {
   const { user, isSignedIn } = useUser();
@@ -23,6 +25,7 @@ export default function Home() {
 
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-15">
+      
       <Image
         src="/2020-Btec.png"
         alt="BTEC"
@@ -31,7 +34,7 @@ export default function Home() {
         className=""
       />
       <h1 className="text-3xl font-bold text-orange-500 align-center">CHẤM CÔNG HÀNG NGÀY</h1>
-      <h1 className="text-xl font-bold text-orange-500 align-center">PHÒNG CTSV FPI ĐÀ NẴNG</h1>
+      <h2 className="text-xl font-bold text-orange-500 align-center">PHÒNG CTSV FPI ĐÀ NẴNG</h2>
 
 
       {!isSignedIn ? (
