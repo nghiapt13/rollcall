@@ -2,7 +2,6 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { isAdminUser } from '@/config/authorized-users';
 import { clerkClient } from '@clerk/nextjs/server';
-import { get } from '@vercel/edge-config'
 
 
 
