@@ -14,8 +14,8 @@ import { ExternalLink, Table, RefreshCw } from 'lucide-react';
 export function ViewGoogleSheets() {
     const [isOpen, setIsOpen] = useState(false);
     const [reloadKey, setReloadKey] = useState(0);
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ2PDr-5t__PkBsaZouAuzXJXMyb7GCdWj1DtSmuTpXzg36doRTnQfvtNR2pjBXI2OpQbZF9Qns3fKF/pubhtml?widget=true&amp;headers=false";
-    const directSheetUrl = "https://docs.google.com/spreadsheets/d/1T-Cw1pHl2cNbJGDUhdRpKfBNqZNje8Je2RcXrTpHQMI/edit?usp=sharing";
+    const sheetUrl = process.env.NEXT_PUBLIC_SHEET_PUBLISH_URL
+    const directSheetUrl = process.env.NEXT_PUBLIC_SHEET_DIRECT_URL
 
     const handleReload = () => {
         setReloadKey(prev => prev + 1);
@@ -63,13 +63,17 @@ export function ViewGoogleSheets() {
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="flex-1 border rounded-lg overflow-hidden" style={{ height: 'calc(90vh - 120px)' }}>
+                <div className="flex-1 border rounded-lg overflow-hidden h-[calc(90vh-120px)] sm:h-[calc(90vh-100px)] md:h-[calc(90vh-120px)]">
                     <iframe
                         key={reloadKey}
                         src={sheetUrl}
-                        className="w-full h-full border-0"
+                        className="w-full h-full border-0 min-h-[300px]"
                         title="Google Sheets - Dữ liệu chấm công"
                         loading="lazy"
+                        style={{
+                            WebkitOverflowScrolling: 'touch', // Enable smooth scrolling on iOS
+                            overflowY: 'auto'
+                        }}
                     />
                 </div>
             </DialogContent>
