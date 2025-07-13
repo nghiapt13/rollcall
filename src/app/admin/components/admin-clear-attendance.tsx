@@ -57,15 +57,15 @@ export function AdminClearAttendance() {
       });
 
       const result = await response.json();
-      
+
       setClearResult({
         success: result.success,
         message: result.message || result.error,
         deletedRows: result.deletedRows
       });
-      
+
       setShowResult(true);
-      
+
       if (result.success) {
         setConfirmCode('');
       }
@@ -110,15 +110,15 @@ export function AdminClearAttendance() {
           Xóa dữ liệu chấm công
         </Button>
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center text-red-600">
             <AlertTriangle className="w-5 h-5 mr-2" />
-            Quản trị - Xóa dữ liệu chấm công
+            Xóa dữ liệu chấm công
           </DialogTitle>
           <DialogDescription className="text-red-700">
-            <strong>⚠️ CẢNH BÁO:</strong> Thao tác này sẽ xóa hoàn toàn tất cả dữ liệu chấm công của mọi người dùng. 
+            <strong>⚠️ CẢNH BÁO:</strong> Thao tác này sẽ xóa hoàn toàn tất cả dữ liệu chấm công của mọi người dùng.
             Hành động này KHÔNG THỂ HOÀN TÁC!
           </DialogDescription>
         </DialogHeader>
@@ -126,26 +126,23 @@ export function AdminClearAttendance() {
         <div className="space-y-4">
           {/* Kết quả thao tác */}
           {showResult && clearResult && (
-            <div className={`p-4 rounded-lg ${
-              clearResult.success 
-                ? 'bg-green-100 border border-green-200' 
+            <div className={`p-4 rounded-lg ${clearResult.success
+                ? 'bg-green-100 border border-green-200'
                 : 'bg-red-100 border border-red-200'
-            }`}>
+              }`}>
               <div className="flex items-center mb-2">
                 {clearResult.success ? (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                 ) : (
                   <X className="w-5 h-5 text-red-600 mr-2" />
                 )}
-                <p className={`font-medium ${
-                  clearResult.success ? 'text-green-800' : 'text-red-800'
-                }`}>
+                <p className={`font-medium ${clearResult.success ? 'text-green-800' : 'text-red-800'
+                  }`}>
                   {clearResult.success ? 'Thành công!' : 'Thất bại!'}
                 </p>
               </div>
-              <p className={`text-sm ${
-                clearResult.success ? 'text-green-700' : 'text-red-700'
-              }`}>
+              <p className={`text-sm ${clearResult.success ? 'text-green-700' : 'text-red-700'
+                }`}>
                 {clearResult.message}
               </p>
               {clearResult.success && clearResult.deletedRows !== undefined && (
@@ -215,7 +212,7 @@ export function AdminClearAttendance() {
                   <Button
                     variant="destructive"
                     disabled={
-                      isClearing || 
+                      isClearing ||
                       confirmCode.trim() !== 'DELETE MY DATA'
                     }
                     className="w-full"
@@ -233,7 +230,7 @@ export function AdminClearAttendance() {
                     )}
                   </Button>
                 </AlertDialogTrigger>
-                
+
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle className="flex items-center text-red-600">
@@ -253,7 +250,7 @@ export function AdminClearAttendance() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Hủy bỏ</AlertDialogCancel>
-                    <AlertDialogAction 
+                    <AlertDialogAction
                       onClick={handleClearAttendance}
                       className="bg-red-600 hover:bg-red-700"
                     >
@@ -264,12 +261,6 @@ export function AdminClearAttendance() {
               </AlertDialog>
             </>
           )}
-
-          {/* Thông tin người dùng */}
-          <div className="text-xs text-gray-600 pt-2 border-t">
-            <p>👤 Đăng nhập với: {user.emailAddresses[0]?.emailAddress}</p>
-            <p>🕒 Thời gian: {new Date().toLocaleString('vi-VN')}</p>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

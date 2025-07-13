@@ -2,14 +2,12 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { isAdminUser } from '@/config/authorized-users';
 import { clerkClient } from '@clerk/nextjs/server';
+// import {get} from '@vercel/edge-config'
 
 
 
-
-// Định nghĩa các route cần bảo vệ (chỉ admin mới truy cập được)
 const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
-  // Thêm các route khác cần bảo vệ ở đây
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
