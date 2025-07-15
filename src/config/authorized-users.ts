@@ -1,5 +1,5 @@
 import { UserRole } from '@/generated/prisma';
-import prisma from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
 
 /**
  * Kiểm tra xem user có quyền điểm danh dựa trên role không
