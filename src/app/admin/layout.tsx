@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { metadata as rootMetadata } from "../layout"
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
-import prisma from '@/lib/prisma';
+import {prisma} from '@/lib/prisma';
 import { UserRole } from '@/generated/prisma';
 
 export const metadata: Metadata = {
