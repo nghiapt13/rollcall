@@ -3,7 +3,7 @@ import { metadata as rootMetadata } from "../layout"
 import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
 import {prisma} from '@/lib/prisma';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from "../../../prisma/app/generated/prisma/client";
 
 export const metadata: Metadata = {
     title: `Trang quản trị | ${rootMetadata.title}`

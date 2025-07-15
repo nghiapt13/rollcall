@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { currentUser } from '@clerk/nextjs/server';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '../../../../prisma/app/generated/prisma/client';
 import {prisma} from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {

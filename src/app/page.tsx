@@ -11,7 +11,7 @@ import { useAttendanceStatus } from "@/hooks/use-attendance-status";
 import { UserProfile } from "@/components/user-profile";
 import { Instruction } from "@/components/instruction";
 import { useCurrentRole } from "@/hooks/useCurrentRole"; // ✅ Thêm import
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from "../../prisma/app/generated/prisma/client";
 
 
 export default function Home() {

@@ -7,7 +7,7 @@ import { useCurrentRole } from '@/hooks/useCurrentRole';
 import { Button } from '@/components/ui/button';
 import { LogOut, CheckCircle2, Clock, AlertCircle, Info } from 'lucide-react';
 import { CheckoutDialog } from './checkout-dialog';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '../../prisma/app/generated/prisma/client';
 
 export function CheckoutButton() {
     const { user } = useUser();
