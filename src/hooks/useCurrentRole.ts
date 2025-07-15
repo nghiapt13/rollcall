@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '../../prisma/app/generated/prisma/client';
 // import { getUserPermissions } from '@/config/authorized-users';
 
 interface UserPermissions {

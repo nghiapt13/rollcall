@@ -9,7 +9,7 @@ import { useCurrentRole } from '@/hooks/useCurrentRole';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { AttendanceDialog } from '@/components/attendance-dialog';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '../../prisma/app/generated/prisma/client';
 
 export function AttendanceButton() {
   const { user } = useUser();

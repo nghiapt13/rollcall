@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import {prisma} from '@/lib/prisma';
-import { UserRole } from '@/generated/prisma';
+import { UserRole } from '../../../../prisma/app/generated/prisma/client';
 
 export async function GET() {
     try {
