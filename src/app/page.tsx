@@ -15,14 +15,14 @@ import { UserRole } from '@/generated/prisma';
 
 
 export default function Home() {
-  const {  isSignedIn } = useUser();
+  const { isSignedIn } = useUser();
   const { openSignIn, signOut } = useClerk();
   const { hasCheckedInToday } = useAttendanceStatus();
   const { role } = useCurrentRole(); // ✅ Sử dụng hook để lấy role
 
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-5">
-      
+
       <Image
         src="/2020-Btec.png"
         alt="BTEC"
@@ -45,12 +45,12 @@ export default function Home() {
         <div className="flex flex-col items-center gap-4">
           {/* User Profile Component */}
           <UserProfile className="mb-2" />
-          
+
           <AttendanceButton />
-          
+
           {/* Chỉ hiển thị checkout button khi đã check-in */}
-          {hasCheckedInToday && <CheckoutButton/>}
-          
+          {hasCheckedInToday && <CheckoutButton />}
+
           {/* Hiển thị thông báo khi chưa check-in */}
           {hasCheckedInToday === false && (
             <div className="text-sm text-gray-600 bg-gray-100 px-4 py-2 rounded-lg">
@@ -85,7 +85,7 @@ export default function Home() {
               Đăng xuất
             </Button>
           </div>
-          
+
           <Instruction />
 
           <Button asChild size="sm" variant="outline" className="border-black">
