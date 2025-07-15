@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { sendLoginDataToSheet } from '@/lib/google-sheets';
 
 export function useManualAttendance() {
   const { user } = useUser();
@@ -34,8 +33,7 @@ export function useManualAttendance() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: userEmail,
-          userId: user.id
+          userId: user.id,
         }),
       });
 
@@ -43,7 +41,13 @@ export function useManualAttendance() {
       
       if (!checkResult.success) {
         console.error('❌ Lỗi kiểm tra trạng thái:', checkResult.error);
-        setAttendanceStatus('error');
+        
+        // Kiểm tra lỗi unauthorized
+        if (checkResult.error?.includes('không có quyền') || checkResult.error?.includes('unauthorized')) {
+          setAttendanceStatus('unauthorized');
+        } else {
+          setAttendanceStatus('error');
+        }
         return;
       }
 
@@ -82,12 +86,13 @@ export function useManualAttendance() {
 
     try {
       setAttendanceStatus('uploading');
-      console.log('☁️ Đang tải ảnh lên Google Drive...');
+      console.log('☁️ Đang tải ảnh lên Cloudinary...');
       
-      // Upload ảnh lên Google Drive
+      // Upload ảnh lên Cloudinary
       const formData = new FormData();
       formData.append('photo', imageBlob, 'attendance-photo.jpg');
       formData.append('userEmail', userEmail);
+      formData.append('userId', user.id);
 
       const uploadResponse = await fetch('/api/upload-photo', {
         method: 'POST',
@@ -106,16 +111,24 @@ export function useManualAttendance() {
       setAttendanceStatus('sending');
       console.log('📤 Đang gửi dữ liệu điểm danh...');
       
-      const loginData = {
-        email: userEmail,
-        name: user.fullName || 'N/A',
-        // Loại bỏ loginTime
-        userId: user.id,
-        photoLink: uploadResult.viewLink
-      };
+      const checkinResponse = await fetch('/api/checkin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          email: userEmail,
+          name: user.fullName || user.firstName || userEmail,  // ✅ Thêm name
+          photoLink: uploadResult.imageUrl  // ✅ Sử dụng imageUrl từ Cloudinary
+        }),
+      });
 
-      // Gửi trực tiếp, API sẽ tự kiểm tra
-      await sendLoginDataToSheet(loginData);
+      const checkinResult = await checkinResponse.json();
+      
+      if (!checkinResult.success) {
+        throw new Error(checkinResult.error || 'Lỗi khi điểm danh');
+      }
       
       console.log('✅ Điểm danh thành công!');
       setAttendanceStatus('success');
@@ -124,12 +137,12 @@ export function useManualAttendance() {
       console.error('❌ Lỗi khi điểm danh:', error);
       
       // Kiểm tra loại lỗi
-      const errorCode = (error as Error & { code?: string })?.code;
+      const errorMessage = (error as Error).message;
       
-      if (errorCode === 'ALREADY_CHECKED_IN') {
+      if (errorMessage.includes('đã điểm danh') || errorMessage.includes('already checked in')) {
         console.log('⚠️ Đã điểm danh hôm nay');
         setAttendanceStatus('already_checked_in');
-      } else if (errorCode === 'UNAUTHORIZED') {
+      } else if (errorMessage.includes('không có quyền') || errorMessage.includes('unauthorized')) {
         console.log('🚫 Không có quyền truy cập');
         setAttendanceStatus('unauthorized');
       } else {

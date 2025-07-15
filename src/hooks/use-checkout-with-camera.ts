@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { sendCheckoutDataToSheet } from '@/lib/google-sheets';
+// Bỏ import Google Sheets
 
 export function useCheckoutWithCamera() {
     const { user } = useUser();
@@ -23,7 +23,6 @@ export function useCheckoutWithCamera() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: userEmail,
                     userId: user.id
                 }),
             });
@@ -65,14 +64,14 @@ export function useCheckoutWithCamera() {
             setCheckoutStatus('checking');
             console.log('🔍 Kiểm tra trạng thái checkout...');
 
+            // Trong hàm checkInitialStatus và handleCheckout
             const checkResponse = await fetch('/api/check-checkout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    email: userEmail,
-                    userId: user.id
+                    userId: user.id  // Chỉ gửi userId
                 }),
             });
 
@@ -133,7 +132,7 @@ export function useCheckoutWithCamera() {
             const formData = new FormData();
             formData.append('photo', imageBlob, 'checkout-photo.jpg');
             formData.append('userEmail', userEmail);
-            formData.append('type', 'checkout'); // Thêm type để phân biệt
+            formData.append('type', 'checkout');
 
             const uploadResponse = await fetch('/api/upload-photo', {
                 method: 'POST',
@@ -148,19 +147,40 @@ export function useCheckoutWithCamera() {
 
             console.log('✅ Upload ảnh checkout thành công');
             
-            // Gửi thông tin checkout kèm link ảnh
+            // Gọi trực tiếp API checkout thay vì Google Sheets
             setCheckoutStatus('sending');
             console.log('📤 Đang gửi dữ liệu checkout...');
             
-            const checkoutData = {
-                email: userEmail,
-                name: user.fullName || 'N/A',
-                checkoutTime: new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }),
-                userId: user.id,
-                photoLink: uploadResult.viewLink
-            };
+            const checkoutResponse = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    checkoutTime: new Date().toISOString(),
+                    userId: user.id,
+                    photoLink: uploadResult.imageUrl
+                }),
+            });
 
-            await sendCheckoutDataToSheet(checkoutData);
+            const checkoutResult = await checkoutResponse.json();
+            
+            if (!checkoutResult.success) {
+                if (checkoutResult.alreadyCheckedOut) {
+                    setCheckoutStatus('already_checked_out');
+                    setHasCheckedOutToday(true);
+                    return;
+                }
+                if (checkoutResult.unauthorized) {
+                    setCheckoutStatus('unauthorized');
+                    return;
+                }
+                if (checkoutResult.notCheckedIn) {
+                    setCheckoutStatus('not_checked_in');
+                    return;
+                }
+                throw new Error(checkoutResult.error || 'Lỗi khi checkout');
+            }
             
             console.log('✅ Checkout thành công!');
             setCheckoutStatus('success');
@@ -168,19 +188,7 @@ export function useCheckoutWithCamera() {
             
         } catch (error) {
             console.error('❌ Lỗi khi checkout:', error);
-            
-            const errorCode = (error as Error & { code?: string })?.code;
-            
-            if (errorCode === 'ALREADY_CHECKED_OUT') {
-                setCheckoutStatus('already_checked_out');
-                setHasCheckedOutToday(true);
-            } else if (errorCode === 'UNAUTHORIZED') {
-                setCheckoutStatus('unauthorized');
-            } else if (errorCode === 'NOT_CHECKED_IN') {
-                setCheckoutStatus('not_checked_in');
-            } else {
-                setCheckoutStatus('error');
-            }
+            setCheckoutStatus('error');
         }
     }, [user]);
 

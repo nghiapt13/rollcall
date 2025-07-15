@@ -6,22 +6,19 @@ import Image from "next/image";
 import { AttendanceButton } from "@/components/attendance-button";
 import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
-import { isAdminUser } from '@/config/authorized-users';
 import { CheckoutButton } from "@/components/checkout-button";
 import { useAttendanceStatus } from "@/hooks/use-attendance-status";
 import { UserProfile } from "@/components/user-profile";
 import { Instruction } from "@/components/instruction";
- // Thêm import
+import { useCurrentRole } from "@/hooks/useCurrentRole"; // ✅ Thêm import
+import { UserRole } from '@/generated/prisma';
 
 
 export default function Home() {
-  const { user, isSignedIn } = useUser();
+  const {  isSignedIn } = useUser();
   const { openSignIn, signOut } = useClerk();
   const { hasCheckedInToday } = useAttendanceStatus();
-
-  // Kiểm tra quyền admin bằng email
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
-  const isAdmin = userEmail ? isAdminUser(userEmail) : false;
+  const { role } = useCurrentRole(); // ✅ Sử dụng hook để lấy role
 
   return (
     <div className="h-screen flex flex-col items-center justify-center gap-4 -mt-5">
@@ -35,7 +32,6 @@ export default function Home() {
       />
       <h1 className="text-3xl font-bold text-orange-500 align-center">CHẤM CÔNG HÀNG NGÀY</h1>
       <h2 className="text-xl font-bold text-orange-500 align-center">PHÒNG CTSV FPI ĐÀ NẴNG</h2>
-
 
       {!isSignedIn ? (
         <Button
@@ -65,7 +61,7 @@ export default function Home() {
           {/* Admin and Debug Buttons */}
           <div className="flex flex-col sm:flex-row gap-2">
             {/* Admin Button - Chỉ hiển thị cho admin */}
-            {isAdmin && (
+            {role === UserRole.ADMIN && (
               <Link href="/admin" className="w-full sm:w-auto mx-auto">
                 <Button
                   variant="outline"

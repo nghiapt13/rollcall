@@ -9,9 +9,7 @@ export function useAttendanceStatus() {
   const checkStatus = useCallback(async () => {
     if (!isSignedIn || !user) return;
     
-    const userEmail = user.emailAddresses[0]?.emailAddress;
-    if (!userEmail) return;
-
+    // ✅ Không cần kiểm tra email nữa
     setIsLoading(true);
     
     try {
@@ -21,8 +19,7 @@ export function useAttendanceStatus() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: userEmail,
-          userId: user.id
+          userId: user.id  // ✅ Chỉ gửi userId
         }),
       });
 
@@ -59,4 +56,4 @@ export function useAttendanceStatus() {
     isLoading,
     refreshStatus: checkStatus
   };
-} 
+}

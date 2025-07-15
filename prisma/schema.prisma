@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// Model User để lưu thông tin người dùng
+model User {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  name      String
+  clerkId   String   @unique // ID từ Clerk authentication
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Quan hệ với bảng điểm danh
+  attendances Attendance[]
+
+  @@map("users")
+}
+
+// Model Attendance để lưu dữ liệu điểm danh
+model Attendance {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  userId String @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Thông tin check-in
+  checkInTime  DateTime
+  checkInPhoto String? // URL ảnh check-in
+
+  // Thông tin check-out
+  checkOutTime  DateTime?
+  checkOutPhoto String? // URL ảnh check-out
+
+  // Ngày điểm danh (để query dễ dàng)
+  date DateTime // Chỉ lưu ngày, không có giờ
+
+  // Metadata
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Index để tìm kiếm nhanh
+  @@unique([userId, date]) // Mỗi user chỉ có 1 record điểm danh mỗi ngày
+  @@map("attendances")
+}
+
+// Enum cho vai trò người dùng - chỉ 2 role chính
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+  USER
+}

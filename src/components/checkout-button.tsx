@@ -3,20 +3,18 @@ import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useCheckoutWithCamera } from '@/hooks/use-checkout-with-camera';
 import { useAttendanceStatus } from '@/hooks/use-attendance-status';
+import { useCurrentRole } from '@/hooks/useCurrentRole';
 import { Button } from '@/components/ui/button';
 import { LogOut, CheckCircle2, Clock, AlertCircle, Info } from 'lucide-react';
 import { CheckoutDialog } from './checkout-dialog';
-import { isAuthorizedUser } from '@/config/authorized-users';
+import { UserRole } from '@/generated/prisma';
 
 export function CheckoutButton() {
     const { user } = useUser();
     const { checkoutStatus, handleCheckout, handlePhotoCapture, resetStatus, hasCheckedOutToday, isCheckingStatus } = useCheckoutWithCamera();
     const { hasCheckedInToday, isLoading: isCheckingAttendance } = useAttendanceStatus();
+    const { canAttendance, role, isLoading: roleLoading, error: roleError } = useCurrentRole();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-    // Kiểm tra quyền truy cập
-    const userEmail = user?.emailAddresses[0]?.emailAddress;
-    const hasPermission = userEmail ? isAuthorizedUser(userEmail) : false;
 
     const handleOpenDialog = () => {
         setIsDialogOpen(true);
@@ -33,8 +31,8 @@ export function CheckoutButton() {
         }
     };
 
-    // Không hiển thị gì khi đang kiểm tra trạng thái attendance
-    if (isCheckingAttendance) {
+    // Nếu đang kiểm tra trạng thái ban đầu hoặc quyền
+    if (isCheckingAttendance || roleLoading) {
         return (
             <div className="flex flex-col items-center space-y-2">
                 <Button disabled size="lg" className="px-6 py-3 bg-gray-400">
@@ -60,21 +58,6 @@ export function CheckoutButton() {
         );
     }
 
-    // Không hiển thị gì nếu không có quyền
-    if (!hasPermission) {
-        return (
-            <div className="flex flex-col items-center space-y-2">
-                <Button disabled size="lg" className="px-6 py-3 bg-gray-400">
-                    <AlertCircle className="w-4 h-4 mr-2" />
-                    Không có quyền checkout
-                </Button>
-                <p className="text-sm text-gray-600 text-center">
-                    Vui lòng liên hệ quản trị viên để được cấp quyền
-                </p>
-            </div>
-        );
-    }
-
     // Hiển thị trạng thái đã checkout
     if (hasCheckedOutToday) {
         return (
@@ -95,9 +78,13 @@ export function CheckoutButton() {
         <div className="flex flex-col items-center space-y-2">
             <Button 
                 onClick={handleOpenDialog}
+                disabled={isCheckingStatus || !canAttendance}
                 size="lg" 
-                className="px-6 py-3 bg-orange-600 hover:bg-orange-700 text-white"
-                disabled={isCheckingStatus}
+                className={`px-6 py-3 ${
+                    canAttendance 
+                        ? 'bg-orange-600 hover:bg-orange-700 text-white' 
+                        : 'bg-gray-400 cursor-not-allowed text-gray-200'
+                }`}
             >
                 {isCheckingStatus ? (
                     <>
@@ -112,6 +99,20 @@ export function CheckoutButton() {
                 )}
             </Button>
             
+            {/* Thông báo khi không có quyền */}
+            {!canAttendance && user && (
+                <div className="flex items-center space-x-2 text-sm text-red-600 border border-red-200 bg-red-50 p-3 rounded-lg max-w-md">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>
+                        {role === UserRole.USER 
+                            ? 'Bạn đang sử dụng tài khoản không được phòng CTSV BTEC FPT ĐN cấp phép. Vui lòng liên hệ Trưởng phòng CTSV BTEC FPT ĐN để xác thực.'
+                            : roleError 
+                                ? `Lỗi kiểm tra quyền: ${roleError}`
+                                : 'Bạn không có quyền checkout. Vui lòng liên hệ quản trị viên.'
+                        }
+                    </span>
+                </div>
+            )}
 
             <CheckoutDialog
                 isOpen={isDialogOpen}

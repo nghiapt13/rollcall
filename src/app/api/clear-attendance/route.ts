@@ -1,22 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { google } from 'googleapis';
-import { isAdminUser } from '@/config/authorized-users';
+import { currentUser } from '@clerk/nextjs/server';
+import { UserRole } from '@/generated/prisma';
+import prisma from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
     try {
-        const { email, confirmCode } = await request.json();
+        const { confirmCode } = await request.json();
 
         console.log('=== XÓA DỮ LIỆU CHẤM CÔNG ===');
 
-        // Kiểm tra quyền admin bằng email
-        if (!email || !isAdminUser(email)) {
-            console.log('❌ CHẶN: Không có quyền admin');
+        // Kiểm tra authentication
+        const user = await currentUser();
+        if (!user) {
+            console.log('❌ CHẶN: Chưa đăng nhập');
+            return NextResponse.json({
+                success: false,
+                error: 'Bạn cần đăng nhập để thực hiện thao tác này.',
+                unauthorized: true
+            }, { status: 401 });
+        }
+
+        // Lấy thông tin user từ database để kiểm tra role
+        const dbUser = await prisma.user.findUnique({
+            where: { clerkId: user.id },
+            select: { role: true, email: true, name: true }
+        });
+
+        if (!dbUser || dbUser.role !== UserRole.ADMIN) {
+            console.log('❌ CHẶN: Không có quyền admin', { userRole: dbUser?.role });
             return NextResponse.json({
                 success: false,
                 error: 'Bạn không có quyền admin. Vui lòng liên hệ quản trị viên.',
                 unauthorized: true
             }, { status: 403 });
         }
+
+        console.log('✅ Xác thực admin thành công:', { email: dbUser.email, name: dbUser.name });
 
         // Kiểm tra mã xác nhận
         if (confirmCode !== 'DELETE MY DATA') {
@@ -26,57 +45,32 @@ export async function POST(request: NextRequest) {
             }, { status: 400 });
         }
 
-        // Cấu hình Google Sheets API
-        const auth = new google.auth.GoogleAuth({
-            credentials: {
-                client_email: process.env.GOOGLE_CLIENT_EMAIL,
-                private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            },
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        });
+        // Đếm số bản ghi chấm công trước khi xóa
+        const totalRecords = await prisma.attendance.count();
+        console.log('📊 Tổng số bản ghi chấm công:', totalRecords);
 
-        const sheets = google.sheets({ version: 'v4', auth });
-        const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-
-        // Đọc dữ liệu từ sheet để đếm số dòng
-        const response = await sheets.spreadsheets.values.get({
-            spreadsheetId,
-            range: 'Sheet1!A:G',
-        });
-
-        const rows = response.data.values || [];
-        console.log('📊 Tổng số dòng:', rows.length);
-
-        if (rows.length <= 1) {
-            console.log('⚠️ Không có dữ liệu để xóa (chỉ có header)');
+        if (totalRecords === 0) {
+            console.log('⚠️ Không có dữ liệu chấm công để xóa');
             return NextResponse.json({
                 success: true,
                 message: 'Không có dữ liệu chấm công để xóa',
-                deletedRows: 0
+                deletedRecords: 0
             });
         }
 
-        // Xóa tất cả dữ liệu trừ header (dòng đầu tiên)
-        const startRow = 2; // Dòng thứ 2 (sau header)
-        const endRow = rows.length; // Dòng cuối cùng
-        const deleteRange = `Sheet1!A${startRow}:F${endRow}`; // Thay đổi từ E thành F
-    
-        console.log(`🗑️ Đang xóa dòng từ ${startRow} đến ${endRow}...`);
-    
-        await sheets.spreadsheets.values.clear({
-            spreadsheetId,
-            range: deleteRange,
-        });
-
-        const deletedRows = endRow - startRow + 1;
-        console.log(`✅ Đã xóa ${deletedRows} dòng dữ liệu chấm công`);
+        // Xóa tất cả dữ liệu chấm công
+        console.log('🗑️ Đang xóa tất cả dữ liệu chấm công...');
+        
+        const deleteResult = await prisma.attendance.deleteMany({});
+        
+        console.log(`✅ Đã xóa ${deleteResult.count} bản ghi chấm công`);
 
         return NextResponse.json({
             success: true,
-            message: `Đã xóa thành công ${deletedRows} bản ghi chấm công`,
-            deletedRows: deletedRows,
-            totalRowsBefore: rows.length,
-            totalRowsAfter: 1 // Chỉ còn header
+            message: `Đã xóa thành công`,
+            deletedRecords: deleteResult.count,
+            totalRecordsBefore: totalRecords,
+            totalRecordsAfter: 0
         });
 
     } catch (error) {
