@@ -6,8 +6,16 @@ const nextConfig: NextConfig = {
             "res.cloudinary.com"
         ]
     },
-    eslint:{
-        ignoreDuringBuilds:true
+    eslint: {
+        ignoreDuringBuilds: true
+    },
+    webpack: (config, { isServer }) => {
+        if (isServer) {
+            // Dynamic import PrismaPlugin
+            const { PrismaPlugin } = eval('require')('@prisma/nextjs-monorepo-workaround-plugin');
+            config.plugins = [...config.plugins, new PrismaPlugin()];
+        }
+        return config;
     }
 };
 
