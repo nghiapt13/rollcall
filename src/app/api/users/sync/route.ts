@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import  prisma  from '@/lib/prisma'
 import { currentUser } from '@clerk/nextjs/server'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Lấy thông tin user từ Clerk
     const user = await currentUser()
