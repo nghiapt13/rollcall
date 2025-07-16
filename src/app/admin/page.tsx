@@ -100,7 +100,7 @@ export default function AdminPage() {
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-blue-600 font-medium">Tổng người dùng</p>
                 <p className="text-xl sm:text-2xl font-bold text-blue-800">
-                  {loading ? '...' : userStats?.attendanceEligible || 0}
+                  {loading ? '...' : Math.max((userStats?.attendanceEligible || 0) - 1, 0)}
                 </p>
               </div>
             </div>
@@ -112,7 +112,7 @@ export default function AdminPage() {
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-green-600 font-medium">Đã checkin hôm nay</p>
                 <p className="text-xl sm:text-2xl font-bold text-green-800">
-                  {loading ? '...' : attendanceStats?.checkedInCount || '...'} / {userStats?.attendanceEligible}
+                  {loading ? '...' : attendanceStats?.checkedInCount || '...'} / {Math.max((userStats?.attendanceEligible || 0) - 1, 0)}
                 </p>
               </div>
             </div>
@@ -124,7 +124,7 @@ export default function AdminPage() {
               <div className="min-w-0">
                 <p className="text-xs sm:text-sm text-orange-600 font-medium">Đã checkout hôm nay</p>
                 <p className="text-xl sm:text-2xl font-bold text-orange-800">
-                  {loading ? '...' : attendanceStats?.checkedOutCount || '...'} / {userStats?.attendanceEligible}
+                  {loading ? '...' : attendanceStats?.checkedOutCount || '...'} / {Math.max((userStats?.attendanceEligible || 0) - 1, 0)}
                 </p>
               </div>
             </div>
