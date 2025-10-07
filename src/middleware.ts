@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import {get} from "@vercel/edge-config"
 
 const isProtectedRoute = createRouteMatcher([
   '/admin(.*)'
